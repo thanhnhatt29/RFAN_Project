@@ -1,0 +1,165 @@
+---
+title: "Phân tích về những yếu tố ảnh hưởng đến tuổi thọ trên toàn thế giới"
+author: "Group 6"
+date: "2022-11-26"
+output:
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Tải thư viện
+
+```{r, include = FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(naniar)
+```
+
+# Phần 1 - Thông tin về project
+
+## 1.1 Bài toán {.build}
+
+1.  Các yếu tố được chọn trong tập dữ liệu có thực sự ảnh hưởng đến tuổi thọ hay không? Các yếu tố thực sự ảnh hưởng đến tuổi thọ là gì?
+2.  Sự thay đổi tuổi thọ trên từng quốc gia dựa vào sự thay đổi của những yếu tố nào trong vòng 15 năm?
+3.  Xây dựng được mô hình dự đoán tuổi thọ cho từng quốc gia riêng biệt, từ những yếu tố riêng
+
+## 1.2 Tập dữ liệu, input, output của bài toán
+
+```{r, include = FALSE}
+LifeExpec<- read_csv("./data/Life Expectancy Data.csv")
+```
+
+## Những biến trong tập dữ liệu:
+
+```{r}
+colnames(LifeExpec)
+```
+
+## **Biến giải thích:**
+
+```{r}
+#Biến giải thích
+colnames(LifeExpec[, -c(1:2, 4)])
+```
+
+-   **Biến phản hồi:** Life Expectancy
+
+## 1.3 Cách đánh giá kết quả
+
+# Phần 2 - Giải pháp
+
+## 1. Phân tích sơ bộ:
+
+```{r, include= FALSE}
+LifeExpec <- subset(LifeExpec, select = -c(Country, Year))
+LifeExpec = LifeExpec[-which(is.na(LifeExpec$`Life expectancy`)),]
+names(LifeExpec) <- make.names( names(LifeExpec) )
+```
+
+### Trực quan hoá dữ liệu thiếu
+
+```{r, echo=FALSE, message = FALSE, warning=FALSE}
+vis_miss(LifeExpec)
+```
+
+```{r, echo=FALSE}
+
+# Calculate median for the high outliers variables.
+Life.expectancy_median <- median(LifeExpec$Life.expectancy,  na.rm = TRUE)
+Adult.Mortality_median <- median(LifeExpec$Adult.Mortality,  na.rm = TRUE)
+Hepatitis.B_median <- median(LifeExpec$Hepatitis.B,  na.rm = TRUE)
+Polio_median <- median(LifeExpec$Polio,  na.rm = TRUE)
+Diphtheria_median <- median(LifeExpec$Diphtheria,  na.rm = TRUE)
+Total.expenditure_median <- median(LifeExpec$Total.expenditure,  na.rm = TRUE)
+GDP_median <- median(LifeExpec$GDP,  na.rm = TRUE)
+Population_median <- median(LifeExpec$Population,  na.rm = TRUE)
+thinness..1.19.years_median <- median(LifeExpec$thinness..1.19.years,  na.rm = TRUE)
+thinness.5.9.years_median <- median(LifeExpec$thinness.5.9.years,  na.rm = TRUE)
+Schooling_median <- median(LifeExpec$Schooling,  na.rm = TRUE)
+
+# Calculate median for the high outliers variables.
+Alcohol_mean <- mean(LifeExpec$Alcohol,  na.rm = TRUE)
+BMI_mean <- mean(LifeExpec$BMI,  na.rm = TRUE)
+Income.composition.of.resources_mean <- mean(LifeExpec$Income.composition.of.resources,  na.rm = TRUE)
+
+# replace the NAs with mean and median values respectively
+LifeExpec$Life.expectancy[is.na(LifeExpec$Life.expectancy)] <- Life.expectancy_median
+LifeExpec$Adult.Mortality[is.na(LifeExpec$Adult.Mortality)] <- Adult.Mortality_median
+LifeExpec$Hepatitis.B[is.na(LifeExpec$Hepatitis.B)] <- Hepatitis.B_median
+LifeExpec$Polio[is.na(LifeExpec$Polio)] <- Polio_median
+LifeExpec$Diphtheria[is.na(LifeExpec$Diphtheria)] <- Diphtheria_median
+LifeExpec$Total.expenditure[is.na(LifeExpec$Total.expenditure)] <- Total.expenditure_median
+LifeExpec$GDP[is.na(LifeExpec$GDP)] <- GDP_median
+LifeExpec$Population[is.na(LifeExpec$Population)] <- Population_median
+LifeExpec$thinness..1.19.years[is.na(LifeExpec$thinness..1.19.years)] <- thinness..1.19.years_median
+LifeExpec$thinness.5.9.years[is.na(LifeExpec$thinness.5.9.years)] <- thinness.5.9.years_median
+LifeExpec$Schooling[is.na(LifeExpec$Schooling)] <- Schooling_median
+#means
+LifeExpec$Alcohol[is.na(LifeExpec$Alcohol)] <- Alcohol_mean
+LifeExpec$BMI[is.na(LifeExpec$BMI)] <- BMI_mean
+LifeExpec$Income.composition.of.resources[is.na(LifeExpec$Income.composition.of.resources)] <- Income.composition.of.resources_mean
+
+
+```
+
+## Tập dữ liệu sau khi đã xử lý
+
+```{r, echo=FALSE, warning=FALSE}
+vis_miss(LifeExpec)
+```
+
+## Trực quan hoá biến phân loại: tuổi thọ theo trạng thái của quốc gia
+
+```{r, echo=FALSE}
+ggplot(LifeExpec ,aes(x= Status,y=Life.expectancy, fill= Status)) + 
+        geom_boxplot() +
+        ggtitle("Tuổi thọ theo trạng thái quốc gia")
+```
+
+## Sự tương quan của các biến liên tục còn lại
+
+```{r, echo=FALSE, warning=FALSE}
+library(ggcorrplot)
+library(corrplot)
+corr <- round(cor(subset(LifeExpec, select =-c(Status))), 3)
+
+ggcorrplot(corr,type = "lower", lab = TRUE, outline.color = "white", lab_size = 1, legend.title = "Correlation", pch.col = "black", tl.cex = 4)
+
+```
+
+## 2. Các thuật toán/mô hình nhóm đã thử nghiệm:
+
+-   Linear model
+
+-   Multiple Linear model
+
+-   VIF
+
+-   Durbin-Watson test
+
+-   studentized Breusch-Pagan test
+
+# Phần 3 - Kết quả sơ bộ
+
+## 1. (Nhật) :
+
+## 2. (Đông) :
+
+## 3. (Hạnh) :
+
+## 4. (Phước) :
+
+# Phần 4 - Kế hoạch tiếp theo
+
+## Kế hoạch
+
+-   Hồi quy Logistic, Grama
+
+-   Phân tích sự khác nhau giữa những quốc gia phát triển và đang phát triển
+
+-   Sử dụng mỗi mô hình cho những năm tiêu biểu và so sánh sự khác nhau giữa những kết quả dự đoán

@@ -1,0 +1,187 @@
+---
+title: "What Factors Affect Life expectancy?"
+author: "Group 6"
+date: "2022-11-06"
+output: html_document
+---
+
+Danh sách thành viên nhóm 6
+
+| **STT** | **MSSV** | **Họ và Tên**      |
+|:--------|:---------|:-------------------|
+| 28      | 20133076 | Văn Mai Thanh Nhật |
+| 33      | 20133082 | Huỳnh Minh Phước   |
+| 3       | 20133035 | Trần Đông          |
+| 5       | 20133013 | Trần Nguyên Hạnh   |
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
+
+```{r, include=FALSE}
+LifeExpec <- read.csv("./data/Life Expectancy Data.csv")
+```
+
+## Phần 1 - Giới thiệu
+
+Mặc dù đã có rất nhiều nghiên cứu được thực hiện để tìm hiểu về các yếu tố ảnh hưởng đến tuổi thọ. Nhưng người ta nhận thấy rằng những nghiên cứu ấy thường chỉ xem xét các biến nhân khẩu học, thành phần thu nhập và tỷ lệ tử vong, không xem xét đến ảnh hưởng của chỉ số miễn dịch hay là phát triển con người. Cũng như một số nghiên cứu lại thực hiện xem xét hồi quy tuyến tính bội số dựa trên tập dữ liệu của một năm trên tất cả các quốc gia.
+
+Những thiếu sót trên đã tạo động lực để nhóm giải quyết cả hai vấn đề nêu trên bằng cách xây dựng mô hình hồi quy dựa trên mô hình tác động hỗn hợp và hồi quy tuyến tính bội số bằng tập dữ liệu bao gồm giai đoạn 2000 đến 2015 của tất cả các quốc gia. Thêm nữa, những yếu tố chủng ngừa quan trọng như Viêm gan B, Bại liệt và Bạch hầu cũng sẽ được thêm vào trong tập dữ liệu.
+
+Dự án này của nhóm sẽ tập trung vào tất cả các yếu tố có thể ảnh hưởng như là chủng ngừa, tử vong, kinh tế, xã hội và các yếu tố liên quan đến sức khỏe khác. Và vì các quan sát này trên những quốc gia khác nhau, nên một quốc gia sẽ dễ dàng xác định yếu tố nào đang ảnh hưởng tiêu cực đến tuổi thọ của người dân. Từ đó, giúp xác định khu vực nào cần được coi trọng để cải thiện tuổi thọ.
+
+## Phần 2 - Dữ liệu
+
+Theo như tác giả, tập dữ liệu này bao gồm tuổi thọ, các yếu tố sức khỏe khác của 193 quốc gia trong giai đoạn 2000 đến 2015 đã được thu thập từ kho dữ liệu của WHO. Ngoài ra, dữ liệu kinh tế tương ứng với quốc gia theo từng năm thì được thu thập từ trang web chính thức của Liên Hợp Quốc. Tệp được hợp nhất cuối cùng (tập dữ liệu cuối cùng) bao gồm 22 cột và 2938 dòng, có tất cả 20 biến dự đoán.
+
+Thông tin về tập dữ liệu
+
+```{r}
+colnames(LifeExpec)
+```
+
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| STT         | Biến                              | Mô tả                                                                                     |
++:============+:==================================+:==========================================================================================+
+| 1           | `Country`                         | Quốc gia                                                                                  |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 2           | `Year`                            | Năm                                                                                       |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 3           | `Status`                          | Loại quốc gia                                                                             |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 4           | `Life expectancy`                 | Tuổi thọ (năm)                                                                            |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 5           | `Adult Mortality`                 | Tỷ lệ tử vong ở người lớn từ 15-60( trên 1000 dân số)                                     |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 6           | `infant deaths`                   | Tỷ lệ tử vong ở trẻ sơ sinh( trên 1000 dân số)                                            |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 7           | `Alcohol`                         | Mức tiêu thụ rượu bình quân đầu người từ 15 tuổi (lít)                                    |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 8           | `percentage expenditure`          | Chi tiêu cho y tế tính theo phần trăm GDP (%)                                             |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 9           | `Hepatitis B`                     | Tỷ lệ tiêm chủng viêm gan B (HepB) ở trẻ 1 tuổi (%)                                       |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 10          | `Measles`                         | Sởi - số trường hợp được báo cáo trên 1000 dân số                                         |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 11          | `BMI`                             | Trung bình chỉ số BMI của toàn bộ dân số                                                  |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 12          | `under-five deaths`               | Tỷ lệ tử vong dưới 5 tuổi ( trên 1000 dân số)                                             |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 13          | `Polio`                           | Tỷ lệ tiêm chủng bại liệt (Pol3) ở trẻ 1 tuổi (%)                                         |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 14          | `Total expenditure`               | Chi tiêu chung của chính phủ cho y tế tính theo phần trăm tổng chi tiêu của chính phủ (%) |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 15          | `Diphtheria`                      | Tỷ lệ tiêm chủng giải độc tố uốn ván và ho gà (DTP3) cho trẻ 1 tuổi (%)                   |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 16          | `HIV/AIDS`                        | Tỷ lệ tử vong trên 1000 trẻ mắc HIV / AIDS bẩm sinh (0-4 tuổi)                            |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 17          | `GDP`                             | Tổng sản phẩm quốc nội bình quân đầu người (tính bằng USD)                                |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 18          | `Population`                      | Dân số của quốc gia                                                                       |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 19          | `thinness  1-19 years`            | Tỷ lệ gầy ốm ở trẻ em và thanh thiếu niên từ 10 đến 19 tuổi (%)                           |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 20          | `thinness 5-9 years`              | Tỷ lệ gầy ốm ở trẻ em từ 5 đến 9 tuổi (%)                                                 |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 21          | `Income composition of resources` | Chỉ số phát triển con người về cơ cấu thu nhập của các nguồn lực (chỉ số từ 0 đến 1)      |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+| 22          | `Schooling`                       | Trình độ học vấn của quốc gia (trung bình số năm được đi học)                             |
++-------------+-----------------------------------+-------------------------------------------------------------------------------------------+
+
+Cấu trúc của tập dữ liệu
+
+```{r}
+glimpse(LifeExpec)
+```
+
+In 6 dòng đầu dữ liệu
+
+```{r}
+head(LifeExpec)
+```
+
+## Phần 3 - Kế hoạch phân tích dữ liệu
+
+### 1. Các biến kết quả (phản hồi, Y) và dự đoán (giải thích, X) mà nhóm sẽ sử dụng để trả lời câu hỏi của mình.
+
+#### Biến dự đoán(giải thích):
+
+```{r}
+#Biến giải thích
+colnames(LifeExpec[, -c(1:2, 4)])
+```
+
+#### Biến kết quả(phản hồi):
+
+-   Life Expectancy
+
+### 2. Các nhóm so sánh nhóm sẽ sử dụng, nếu có.
+
+-   Nhóm những quốc gia có cùng GDP để so sánh về những yếu tố nhân khẩu học
+
+-   Nhóm những quốc gia có cùng mức độ chi tiêu cho y tế
+
+-   Nhóm những quốc gia có cùng chỉ số phát triển con người
+
+-   Nhóm những quốc gia có cùng dân số và xem ảnh hưởng của những yếu tố khác lên tuổi thọ
+
+### 3. Những câu hỏi đặt ra:
+
+Những câu hỏi sẽ chia ra gồm 2 phần, phần đầu sẽ là những câu hỏi liên quan đến những yếu tố chung ảnh hưởng đến tuổi thọ trên toàn thế giới như là thói quen, bệnh tật, tiêm chủng .... Ở phần 2 sẽ là những yếu tố ảnh hưởng từ quốc gia nơi họ sinh sống bao gồm tỷ lệ chi tiêu cho y tế trên GDP, sự phát triển của quốc gia, trình độ học vấn ...
+
+1.  Các yếu tố được chọn trong tập dữ liệu có thực sự ảnh hưởng đến tuổi thọ hay không? Các yếu tố thực sự ảnh hưởng đến tuổi thọ là gì?
+    1.  Tỷ lệ tử vong, tỷ lệ gầy ốm, bệnh tật ảnh hưởng đến tuổi thọ như thế nào?
+    2.  Tuổi thọ có mối tương quan tích cực hay tiêu cực với các yếu tố như là thói quen ăn uống, lối sống, tập thể dục, hút thuốc, uống rượu ...
+    3.  Tác động của tiêm chủng đối với tuổi thọ như thế nào?
+    4.  Mức độ chi tiêu cho y tế cao có thật sự nâng cao tuổi thọ?
+2.  Sự thay đổi tuổi thọ trên từng quốc gia dựa vào sự thay đổi của những yếu tố nào trong vòng 15 năm?
+    1.  Tuổi thọ có bị ảnh hưởng bởi sự phát triển, chi tiêu về y tế, GDP, trình độ học vấn của quốc gia hay không?
+
+    2.  Một quốc gia có giá trị tuổi thọ thấp hơn (\<65) có nên tăng chi tiêu cho chăm sóc sức khỏe để cải thiện tuổi thọ trung bình của mình không?
+
+    3.  Làm thế nào để cải thiện những chỉ số BMI, hay phát triển con người dựa trên dân số?
+
+    4.  Các quốc gia đông dân có xu hướng có tuổi thọ thấp hơn không?
+
+### 4.(Các) phương pháp thống kê mà nhóm tin rằng sẽ hữu ích trong việc trả lời (các) câu hỏi đặt ra.
+
+-   Xây dựng mô hình hồi quy tuyến tính bội với biến tuổi thọ là biến phản hồi, còn lại là biến giải thích (Multiple Linear Regression)
+
+-   Mô hình hồi quy tuyến tính tổng quát (Gamma Regression)
+
+-   Mô hình hồi quy logistic (Logistic regression)
+
+-   Kiểm tra đa cộng tuyến (Multicollinearity Test)
+
+-   Kiểm tra tự tương quan (Autocorrelation Test)
+
+## 5. Kế hoạch:
+
++------------------------------------+------------------------------------------------------------------+-------------+
+| Mục                                | Công việc                                                        | Phân công   |
++====================================+==================================================================+=============+
+| 1.1                                | -   EDA                                                          | Đông        |
+|                                    |                                                                  |             |
+| Những yếu tố chung cho từng năm    | <!-- -->                                                         |             |
+|                                    |                                                                  |             |
+|                                    | -   Kiểm định cho tỷ lệ tử vong, gầy ốm, bệnh tật                |             |
++------------------------------------+------------------------------------------------------------------+-------------+
+| 1.2, 1.3, 1.4                      | -   Trực quan hoá                                                | Hạnh        |
+|                                    |                                                                  |             |
+| Những yếu tố từ chung cho từng năm | -   Kiểm định cho thói quen, tiêm chủng, chi tiêu cho y tế       |             |
++------------------------------------+------------------------------------------------------------------+-------------+
+| 2.1, 2.2                           | -   Mô hình dự đoán                                              | Phước       |
+|                                    |                                                                  |             |
+| Những yếu tố từ quốc gia           | -   Kiểm định cho sự phát triển, chi tiêu y tế, trình độ học vấn |             |
++------------------------------------+------------------------------------------------------------------+-------------+
+| 2.3, 2.4                           | -   Mô hình dự đoán                                              | Nhật        |
+|                                    |                                                                  |             |
+| Những yếu tố từ quốc gia           | -   Kiểm định cho những chỉ số con người                         |             |
++------------------------------------+------------------------------------------------------------------+-------------+

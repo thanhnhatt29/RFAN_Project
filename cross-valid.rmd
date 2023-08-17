@@ -1,0 +1,130 @@
+---
+title: "cross valid"
+author: "HMP"
+date: "2022-12-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message =  FALSE)
+```
+
+## Input
+
+```{r}
+library(caret)
+library(VIM)
+library(tidyr)
+library(dplyr)
+library(rsample)
+library(ModelMetrics)
+```
+
+```{r cars}
+data_input<-read.csv("Life Expectancy Data.csv")
+data_input<-kNN(data_input)
+data<-data_input[-c(1,2,3,c(23:44))]
+head(data)
+```
+
+## Cross valid
+
+Tạo các tham số
+
+```{r}
+initial_split <- initial_split(data, prop = 0.70)
+expectancy_train <- training(initial_split)
+expectancy_test <- testing(initial_split)
+```
+
+```{r}
+head(expectancy_train)
+
+```
+
+```{r}
+#lambda
+lambda<-10^seq(-3,3,length.out=100)
+
+#lựa ra các biến
+stepwise_selection<-data %>% select(-hepatitis_B,-measles,-polio,-total_expenditure,-GDP,-population,-thinness_1.19,-schooling,-infant_mortality)%>% names()
+
+
+#train control
+# train_control<-trainControl(method="cv", number = 5)
+```
+
+```{r}
+
+rmse_cv <- data.frame(folds=numeric(0), rmse=numeric(0))
+for (x in 2:50) {
+  train_control<-trainControl(method="cv", number = x)
+  model_5CV <- train(life_expectancy~., data = expectancy_train[,stepwise_selection], trControl=train_control, method="lm", preProcess = c("center", "scale"))
+  
+  rmse_cv[nrow(rmse_cv) + 1,] = c(x, model_5CV$results$RMSE)
+}
+
+ggplot(rmse_cv, aes(folds, rmse)) +
+  geom_point() +
+  geom_line()
+```
+
+```{r}
+ggplot(rmse_cv, aes(folds, rmse)) +
+  geom_point() +
+  geom_line()
+```
+
+```{}
+```
+
+```{r}
+  train_control<-trainControl(method="cv", number = 11)
+  model_5CV <- train(life_expectancy~., data = expectancy_train[,stepwise_selection], trControl=train_control, method="lm", preProcess = c("center", "scale"))
+  model_5CV$results$RMSE
+```
+
+```{rmse_cv[nrow(rmse_cv) + 1,] = c(x, model_5CV.rmse)}
+}
+# #5 fold CV
+# model_5CV <- train(life_expectancy~., data = expectancy_train[,stepwise_selection], 
+#                trControl=train_control, method="lm", preProcess = c("center", "scale"))
+
+# #elastic CV
+# model_elastic <- train(
+#   life_expectancy ~., data = expectancy_train, method = "glmnet",
+#   preProcess = c("center", "scale"),
+#   trControl = train_control,
+#   tuneLength = 10
+#   )
+```
+
+predict
+
+```{r}
+
+#model 5CV
+model_5CV.pred<-predict(model_5CV,newdata=expectancy_test[,-1])
+model_5CV.rmse<-rmse(pred = model_5CV.pred,actual = expectancy_test$life_expectancy)
+
+model_5CV.rmse
+
+#model elastic CV
+elastic.cv.pred <- predict(model_elastic, model.matrix(life_expectancy ~., expectancy_test)[,-1])
+elastic.cv.rmse <- rmse(elastic.cv.pred,expectancy_test$life_expectancy)
+elastic.cv.rmse
+```
+
+so sánh rmse xem cái nào nhỏ nhất thì kết luận
+
+lấy ra thông số model, ở đây là 5CV
+
+```{r}
+coef(model_5CV$finalModel)
+```
+
+còn đây là elastic
+
+```{r}
+coef(model_elastic$finalModel,model_elastic$bestTune$lambda)
+```

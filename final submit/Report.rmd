@@ -1,0 +1,378 @@
+---
+title: 'Report: Life Expectancy'
+author: "Group 6"
+date: "2022-12-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message =  FALSE)
+```
+
+# Phần 1. Tóm tắt
+
+Mặc dù trước đây đã có rất nhiều nghiên cứu được thực hiện để tìm hiểu về các yếu tố ảnh hưởng đến tuổi thọ. Nhưng những nghiên cứu ấy chỉ xem xét các biến nhân khẩu học, thành phần thu nhập và tỷ lệ tử vong, ít khi xem xét đến ảnh hưởng của chỉ số miễn dịch, tiêm chủng hay chỉ số phát triển con người. Cũng như một số nghiên cứu lại thực hiện xem xét hồi quy tuyến tính bội số dựa trên tập dữ liệu của một năm trên tất cả các quốc gia.
+
+Những thiếu sót trên đã tạo động lực để nhóm giải quyết cả những vấn đề nêu trên bằng cách xây dựng những mô hình hồi quy bằng tập dữ liệu bao gồm giai đoạn 2000 đến 2015 của tất cả các quốc gia để tìm ra những yếu tố thật sự tác động đến tuổi thọ của con người. Những yếu tố chủng ngừa quan trọng như Viêm gan B, Bại liệt và Bạch hầu cũng đã được thêm vào trong tập dữ liệu.
+
+Kết quả cuối cùng nhóm đã chọn được 10 yếu tố quan trọng được quan sát trong tập dữ liệu đã có ảnh hưởng, bao gồm:
+
+-   Tỷ lệ tử vong ở người lớn
+
+-   Tỷ lệ chi tiêu cho y tế trên GDP (%)
+
+-   Trung bình chỉ số BMI theo quốc gia
+
+-   Tỷ lệ tiêm chủng bại liệt (Pol3) ở trẻ 1 tuổi (%)
+
+-   Chi tiêu cho y tế tính theo tổng chi tiêu của chính phủ (%)
+
+-   Tỷ lệ tiêm chủng giải độc tố uốn ván và ho gà (DTP3) cho trẻ 1 tuổi (%)
+
+-   Tỷ lệ tử vong trên 1000 trẻ mắc HIV / AIDS bẩm sinh (0-4 tuổi)
+
+-   Tỷ lệ gầy ốm ở trẻ em và thanh thiếu niên từ 10 đến 19 tuổi (%)
+
+-   Chỉ số phát triển con người về cơ cấu thu nhập của các nguồn lực (chỉ số từ 0 đến 1)
+
+-   Trình độ học vấn của quốc gia (trung bình số năm được đi học)
+
+Trên thực tế, có thể còn có rất nhiều yếu tố khác nữa làm tăng hay giảm tuổi thọ, hay những yếu tố đặc biệt của từng quốc gia riêng biệt sẽ ảnh hưởng , đây chỉ là những yếu tố được đánh giá chung và không mang tính cá nhân hoá cho từng quốc gia nào.
+
+# Phần 2. Giới thiệu
+
+Theo xu hướng phát triển và hiện đại hoá, sức khoẻ cũng là một khía cạnh rất quan trọng trong xã hội ngày này, nhờ đó mà sức khoẻ con người đã cải thiện rõ rệt qua từng năm qua, dẫn đến tuổi thọ của con người ngày càng tăng, có gì là tốt hơn khi có một cuộc đời dài để cống hiện . Vậy sự thay đổi này đã nhờ vào sự thay đổi của những yếu tố nào? là *nhân khẩu, kinh tế, hay y tế, tiêm chủng*?
+
+Việc tìm ra những yếu tố này giúp cho thế giới nói chung hay từng quốc gia nói riêng phải tâp trung phát triển, nâng cao và quan tâm vào những khía cạnh nào nếu muốn gia tăng tuổi thọ người dân.
+
+Những lí do này cùng với đề cập ở phần trên, có hàng tá những yếu tố có thể ảnh hưởng đến tuổi thọ của con người, dẫn đến cho ta những câu hỏi: vậy thì nó ảnh hưởng như thế nào? Tác động của nó là nhỏ hay lớn? Những mối liên hệ này có tuân theo quy tắc nào hay không? Và những mối quan hệ này sẽ giúp ích được gì trong dự đoán tương lai? Đó là những câu hỏi mà ta sẽ đi giải thích trong bài báo cáo này. Đồng thời báo cáo cũng cung cấp cho người đọc một góc nhìn sâu sắc hơn về vấn đề sức khoẻ hiện nay để có thể tự giúp cho bản thân nâng cao được chất lượng đời sống cũng như tuổi thọ.
+
+Trong báo cáo này, đầu vào mà nhóm sử dụng cho bài toán là tập các :
+
+-   Quốc gia
+
+-   Năm
+
+-   Trạng thái quốc gia (Phát triển/ Đang phát triển)
+
+-   Tỷ lệ tử vong ở người lớn từ 15-60( trên 1000 dân số)
+
+-   Tỷ lệ tử vong ở trẻ sơ sinh( trên 1000 dân số)
+
+-   Mức tiêu thụ rượu bình quân đầu người từ 15 tuổi (lít)
+
+-   Chi tiêu cho y tế tính theo phần trăm GDP (%)
+
+-   Tỷ lệ tiêm chủng viêm gan B (HepB) ở trẻ 1 tuổi (%)
+
+-   Sởi - số trường hợp được báo cáo trên 1000 dân số
+
+-   Trung bình chỉ số BMI của toàn bộ dân số
+
+-   Tỷ lệ tử vong dưới 5 tuổi ( trên 1000 dân số)
+
+-   Tỷ lệ tiêm chủng bại liệt (Pol3) ở trẻ 1 tuổi (%)
+
+-   Chi tiêu của chính phủ cho y tế tính theo tổng chi tiêu của chính phủ(%)
+
+-   Tỷ lệ tiêm chủng giải độc tố uốn ván và ho gà (DTP3) cho trẻ 1 tuổi (%)
+
+-   Tỷ lệ tử vong trên 1000 trẻ mắc HIV / AIDS bẩm sinh (0-4 tuổi)
+
+-   Tổng sản phẩm quốc nội bình quân đầu người (tính bằng USD)
+
+-   Dân số của quốc gia
+
+-   Tỷ lệ gầy ốm ở trẻ em và thanh thiếu niên từ 10 đến 19 tuổi (%)
+
+-   Tỷ lệ gầy ốm ở trẻ em từ 5 đến 9 tuổi (%)
+
+-   Chỉ số phát triển con người về cơ cấu thu nhập của các nguồn lực (chỉ số từ 0 đến 1)
+
+-   Trình độ học vấn của quốc gia (trung bình số năm được đi học)
+
+Nhóm sử dụng những thuật toán:
+
+-   Hồi quy tuyến tính bội
+
+-   Best subset
+
+-   Foward inclusion
+
+-   Backward elimination
+
+-   Những thông số đánh giá: AIC, BIC, Cp, RMSE, R Square, RSS
+
+Để:
+
+-   Tìm ra mối quan hệ của từng yếu tố được quan sát trong bộ dữ liệu tuổi thọ
+
+# Phần 3. Dữ liệu
+
+Trong đề tài này, nhóm xin dùng bộ dữ liệu [*Life Expectancy (WHO)*](https://www.kaggle.com/datasets/kumarajarshi/life-expectancy-who) để trực quan hoá mối liên hệ và tác động kể trên để phần nào hiểu rõ hơn về việc việc phân tích dữ liệu.
+
+Theo như tác giả, tập dữ liệu này bao gồm tuổi thọ, các yếu tố sức khỏe khác của 193 quốc gia trong giai đoạn 2000 đến 2015 đã được thu thập từ [Đài quan sát sức khỏe toàn cầu (GHO)](https://www.who.int/data/gho) thuộc tổ chức Y tế thế giới WHO. Các tập dữ liệu này được chia sẽ công khai nhằm mục đích phân tích dữ liệu sức khoẻ
+
+Ngoài ra, dữ liệu kinh tế tương ứng với quốc gia theo từng năm thì được thu thập từ trang web chính thức của [Liên Hợp Quốc](https://www.un.org/en/).
+
+Tệp csv được hợp nhất cuối cùng (tập dữ liệu cuối cùng) bao gồm 22 cột và 2938 dòng, có tất cả 20 biến dự đoán, 2 biến còn lại là Tuổi thọ và Quốc gia. Trong 20 biến dự đoán gồm 1 biến phân loại là trạng thái quốc gia, còn lại là biến liên tục.
+
+## 3.1 Tiền xử lý
+
+Nhóm đã sử dụng những phương pháp để tiền xử lý dữ liệu bao gồm:
+
+-   Điền dữ liệu bị thiếu trong toàn bộ các cột bằng thuật toán K-nearest neighbor (kNN) với k = 5
+
+-   Loại bỏ những biến không cần thiết gồm Quốc gia, Năm, Trạng thái để áp dụng mô hình tuyến tính
+
+-   Thực hiện Square root với độ lệch âm cho cột tuổi thọ để giảm độ lệch
+
+# Phần 4. Trực quan hoá dữ liệu
+
+## 4.1 Bản đồ tuổi thọ vào năm 2015
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320664401_1789076694781971_7362086840920825972_n.png?_nc_cat=108&ccb=1-7&_nc_sid=aee45a&_nc_ohc=w-e8QXbqfigAX8bK7XO&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdTO6COuOuag-aVPUDvh8zlplq8SZlwUKZ8lmvl9iRlz7A&oe=63C83208)
+
+## 4.1 Biểu đồ tần số của mọi biến trong dữ liệu
+
+![source: <https://www.kaggle.com/code/premdj/eda-life-expetancy>](https://www.kaggleusercontent.com/kf/77593431/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..j3LOuHFVbobjTt1aJpKosA.HA7o8dRo3L1EPC9I-XT_zSM0uowSPV6HHg-Pf1W9-etaSPd4gHV6GEoDVWQYwKv_9k-5SX2qewUCeLvF_CnHZyBi6fMt7cxm8Dj9CS4Bv4ALjeJmgSnYB46V16LOjl1E65hDxIhzCHPkPmagGmUGClRpfaRVaEjutMNS3Y2i8YxNP0MnOJI9vH_9d0qF3z5RKVdVHzvP_lmPnixm3d3AnwF_G7hEoN_T2P3U9mV4tpXGqvbIkhLmCAHP_WzJIlOH55wVrO8JckXCvrusvmQ9BxfXK6sLkWw7DheGRKUZ33MKoqu4-B5B8E7WbuxIxHr17P_fhEMLCkyuVxxOceEKXGLcAcCAfCd0U5rAi5YQdREJIscvDdWlna5_CNwKeUoJ5SEzMcQ4O7L17F4Fux2B4dPm39uz2YU3-53ymJUfBoEFdxqKsEfBWMfxkapNh02FhyLiKQf3Bl6umRk6Xwal-auGmjUkpVntGxgSGcjCa8XN1-CKhrtai0e1uOoYnMwQ_cN6TZlC3NvNXMxqRYZhu6ucLaS3oF1olQ8C9nRc2Mxrt7CUuAVUNWyQkK-2OPaFc6xFFRn2bjkk_Hrd2Xxc0GwrWc_UL42sDKSq4ctbZcLYVQo3CnHUn_VI2Kx_Nfz_S5PNmFqXuvzUOc9WQwPbZw.JvklugHKuWup7-pgKhIm_Q/__results___files/__results___24_0.png)
+
+## 4.1 Tuổi thọ ứng với GDP theo từng châu lục
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320755282_710881470453567_1652363435509457231_n.png?_nc_cat=103&ccb=1-7&_nc_sid=aee45a&_nc_ohc=bQktoa0mZ9oAX8y99K6&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQAbZJNRpqHnCKjLnr5zfN8B5k99ivzVT9XnWyWxbJwrw&oe=63C81D02)
+
+## 4.2 Tuổi thọ với tất cả các biến theo trạng thái quốc gia
+
+![source: <https://www.kaggle.com/code/premdj/eda-life-expetancy>](https://www.kaggleusercontent.com/kf/77593431/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..j3LOuHFVbobjTt1aJpKosA.HA7o8dRo3L1EPC9I-XT_zSM0uowSPV6HHg-Pf1W9-etaSPd4gHV6GEoDVWQYwKv_9k-5SX2qewUCeLvF_CnHZyBi6fMt7cxm8Dj9CS4Bv4ALjeJmgSnYB46V16LOjl1E65hDxIhzCHPkPmagGmUGClRpfaRVaEjutMNS3Y2i8YxNP0MnOJI9vH_9d0qF3z5RKVdVHzvP_lmPnixm3d3AnwF_G7hEoN_T2P3U9mV4tpXGqvbIkhLmCAHP_WzJIlOH55wVrO8JckXCvrusvmQ9BxfXK6sLkWw7DheGRKUZ33MKoqu4-B5B8E7WbuxIxHr17P_fhEMLCkyuVxxOceEKXGLcAcCAfCd0U5rAi5YQdREJIscvDdWlna5_CNwKeUoJ5SEzMcQ4O7L17F4Fux2B4dPm39uz2YU3-53ymJUfBoEFdxqKsEfBWMfxkapNh02FhyLiKQf3Bl6umRk6Xwal-auGmjUkpVntGxgSGcjCa8XN1-CKhrtai0e1uOoYnMwQ_cN6TZlC3NvNXMxqRYZhu6ucLaS3oF1olQ8C9nRc2Mxrt7CUuAVUNWyQkK-2OPaFc6xFFRn2bjkk_Hrd2Xxc0GwrWc_UL42sDKSq4ctbZcLYVQo3CnHUn_VI2Kx_Nfz_S5PNmFqXuvzUOc9WQwPbZw.JvklugHKuWup7-pgKhIm_Q/__results___files/__results___25_0.png)
+
+# Phần 5. Mô hình hoá dữ liệu
+
+## **WorkFlow**
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/318776070_1313193859520296_5852520200730962005_n.png?_nc_cat=103&ccb=1-7&_nc_sid=aee45a&_nc_ohc=RZHQwsc8ZKQAX917Roe&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdTZ58U_AbZbLtSpvMsDQoK9wgiUaMFx3iiiAHhoaGT3cg&oe=63C7EFCE)
+
+## 5.1 Những phương pháp sử dụng:
+
+### 5.1.1 Best subset
+
+Best subset selection là phương pháp nhằm tìm bộ các biến giải thích dự đoán tốt nhất bằng mọi tổ hợp biến có thể.
+
+![](https://quantifyinghealth.com/wp-content/uploads/2020/09/best-subset-selection-example-with-3-variables.png)
+
+### 5.1.2 Forward inclusion
+
+Forward inclusion bắt đầu với tập biến rỗng và thêm dần các biến đi và tìm ra mô hình dự đoán tốt nhất.
+
+![](https://quantifyinghealth.com/wp-content/uploads/2019/10/forward-stepwise-algorithm.png)
+
+### 5.1.3 Backward elimination
+
+Backward elimination bắt đầu với toàn bộ biến và loại dần các biến đi và tìm ra mô hình dự đoán tốt nhất.
+
+![](https://quantifyinghealth.com/wp-content/uploads/2019/10/backward-stepwise-algorithm.png)
+
+## 5.2 Những thông số đánh giá:
+
+### 5.2.1 RMSE: Root Mean Square Error
+
+RMSE là độ lệch gốc trung bình, sử dụng để đo sự khác biệt giữa các giá trị được dự đoán bởi mô hình và các giá trị quan sát.
+
+![](https://miro.medium.com/max/966/1*lqDsPkfXPGen32Uem1PTNg.png)
+
+![](https://miro.medium.com/max/611/1*jopCO2kMEI84s6fiGKdXqg.png)
+
+### 5.2.2 R Square: 
+
+'R-square' là tỉ lệ của sự thay đổi trong biến phụ thuộc có thể dự đoán được từ biến độc lập. Chỉ số càng cao mô hình càng đáng tin cậy.
+
+![](https://miro.medium.com/max/1200/1*_mVvAFVEGinHlijmmeWwzg.png)
+
+### 5.2.3 Mallow's CP
+
+Mallow's CP được sử dụng để đánh giá sự phù hợp của một mô hình hồi quy bằng cách sử dụng bình phương nhỏ nhất thông thường.
+
+![](https://lupinepublishers.com/biostatistics-biometrics-journal/images/Lupinepublishers-openaccess-Biostatistics-Biometrics-journal.ID.000101.E010.png){width="349"}
+
+![](https://i.stack.imgur.com/mTg9w.jpg){width="583"}
+
+### 5.2.4 RSS: Residual Sum of Squares
+
+RSS là là sự khác biệt giữa dữ liệu và mô hình ước tính. RSS nhỏ cho thấy mô hình phù hợp với dữ liệu.
+
+![](https://cdn.wallstreetmojo.com/wp-content/uploads/2022/05/formula-of-calculate-residual-sum-of-squares.jpg.webp){width="368"}
+
+![](https://cdn.wallstreetmojo.com/wp-content/uploads/2022/05/Residual-sum-of-squares.jpg)
+
+### 5.2.5 BIC: **Bayesian information criterion**
+
+BIC là một tiêu chí để chọn mô hình trong một tập hữu hạn các mô hình. Các mô hình có BIC thấp hơn sẽ được ưu tiên hơn.
+
+![](https://miro.medium.com/max/1400/1*fFwIhx1OYUfjuLYU99eJ7Q.png)
+
+### 5.2.6 AIC: Akaike information criterion
+
+Tiêu chí thông tin Akaike là công cụ ước lượng sai số dự đoán và do đó chất lượng tương đối của các mô hình thống kê cho một tập hợp dữ liệu nhất định. Đưa ra một bộ sưu tập các mô hình cho dữ liệu, AIC ước tính chất lượng của từng mô hình, so với từng mô hình khác.
+
+![](https://builtin.com/sites/www.builtin.com/files/styles/ckeditor_optimize/public/inline-images/1_what-is-aic.png)
+
+# Phần 6. Thực nghiệm, kết quả, thảo luận
+
+## 6.1 Mô hình với tất cả các biến trong tập dữ liệu
+
+![Full feature model](https://scontent.xx.fbcdn.net/v/t1.15752-9/320570728_1136309630348651_1205581381271055137_n.png?_nc_cat=103&ccb=1-7&_nc_sid=aee45a&_nc_ohc=IruawfurTO4AX9UPJtm&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdRimWz06oiwHEDPd3E9wl5nXDrMJyMgSnnzVHP-sCO2Sg&oe=63C79AF4)
+
+**Nhận xét:**
+
+-   Các giả định tuyến tính đều được đáp ứng ở mô hình toàn bộ biến.
+
+-   Residual vs Fitted plot: Không có điểm dư nào quá nổi bật, các điểm đa số nằm dọc theo theo quanh đường nga 0, có thể nhận định rằng có quan hệ tuyến tính giữa biến dự đoán và biến kết quả.
+
+-   Scale-Location plot: Phần dư nằm trải đều trên khắp phạm vi dự đoán, không có điểm dư nào quá nổi bật khỏi mô hình.
+
+-   Normal Q-Q plot: Các biến được trải đều trên đường dự đoán, có thể nhận định rằng phần dư hòa toàn bình thường.
+
+-   Residuals vs Leverage: Các điểm nằm trong khoảng 0.5 Cook distance đều ảnh hưởng. Tuy nhiên lại không có điểm ảnh hưởng(các điểm nằm ngoài cook distance).
+
+![Predict vs Actual](https://scontent.xx.fbcdn.net/v/t1.15752-9/320430424_849720806332128_5582940683977690268_n.png?_nc_cat=106&ccb=1-7&_nc_sid=aee45a&_nc_ohc=WUg8TVkz_RcAX-Nn-QC&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQwEQusTlByXqtdl8Hz0amPHdp7uqEXLxgmwL1EyPzEFw&oe=63C79A43)
+
+**Nhận xét:**
+
+-   Predicted vs Actual: Đa phần các điểm nằm trên đường dự đoán hoặc tạo thành một đường thẳng gần quanh đường dự đoán. Điều này cho thấy rằng mô hình có thể dự đoán tương đối chính xác với một sai số không quá đáng kể.
+
+![Metrics](https://scontent.xx.fbcdn.net/v/t1.15752-9/320662414_642323107631247_704269889626475059_n.png?_nc_cat=107&ccb=1-7&_nc_sid=aee45a&_nc_ohc=gwxs2ZQNtu0AX-4LlnW&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQvsKIMclh3MhWqpS0u3Vf4jjfZT5RA3Jd-PshiirhFmw&oe=63C7B8C7)
+
+## 6.2 Mô hình được chọn bằng AIC
+
+![Model (step)](https://scontent.xx.fbcdn.net/v/t1.15752-9/320448855_698006995270472_7035293568752028635_n.png?_nc_cat=100&ccb=1-7&_nc_sid=aee45a&_nc_ohc=vl_JmLuLWNAAX-6hdUU&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdRcZuAR5iz7FsKFi86-ZdtEpjIK2-w7HjMrUVDaO71kTA&oe=63C7A46F)
+
+**Nhận xét:**
+
+-   Tương tự như mô hình đầy đủ biến.
+
+-   Residual vs Leverage: Các điểm nằm trong hình đều ảnh hưởng (do không có Cook distance).
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320147690_1562832494144068_6454946314924379176_n.png?_nc_cat=102&ccb=1-7&_nc_sid=aee45a&_nc_ohc=jox1mG8Om1YAX9E92Yn&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdTbkGUHQ57G1YQT8Q5L8RBHG_I_AqvyUcgoyS4t0_n-ZA&oe=63C7AB42)
+
+**Nhận xét:**
+
+-   Predicted vs Actual: Đa phần các điểm nằm trên đường dự đoán hoặc tạo thành một đường thẳng gần quanh đường dự đoán. Điều này cho thấy rằng mô hình có thể dự đoán tương đối chính xác với một sai số không quá đáng kể.
+
+![Metrics](https://scontent.xx.fbcdn.net/v/t1.15752-9/320298112_5735443876536272_5019425710909297943_n.png?_nc_cat=108&ccb=1-7&_nc_sid=aee45a&_nc_ohc=zzIbO9MI0T8AX-xkrxX&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdT_EdRUPalLWaVuIhvXWzRvNdRZBs7ZM22OwCksqpkKjw&oe=63C7B2EB)
+
+## 6.3 Mô hình được chọn bằng các thuật toán Stepwise
+
+### 6.3.1 Best subset
+
+![Best subset](https://scontent.xx.fbcdn.net/v/t1.15752-9/320359143_665851971683777_8981689007423129057_n.png?_nc_cat=104&ccb=1-7&_nc_sid=aee45a&_nc_ohc=KIyFgOKRib0AX9Kzy3h&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdRByc1z0XnEeEyZrDAlQg6ASch7HTIw2yWtvee_8veL4A&oe=63C7968B)
+
+**Nhận xét:**
+
+-   Có thể thấy BIC cho mô hình có số biến ít nhất nên từ đây chỉ xét theo BIC.
+
+### 6.3.2 Forward inclusion
+
+![Forward inclusion](https://scontent.xx.fbcdn.net/v/t1.15752-9/320390652_831835324737346_2925171380944960976_n.png?_nc_cat=103&ccb=1-7&_nc_sid=aee45a&_nc_ohc=kw04MrtrHQkAX9Q58ud&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdR_m3IYeEzK7y7svEzic-lvppnno251w73fmv4uHgfHGA&oe=63C799F6)
+
+**Nhận xét:**
+
+-   Tương tự với Best subset thì số biến tối ưu nhất vẫn là 10 biến
+
+### 6.3.3 Backward elimination
+
+![Backward elimination](https://scontent.xx.fbcdn.net/v/t1.15752-9/320650315_872672523916336_4816856892825317486_n.png?_nc_cat=106&ccb=1-7&_nc_sid=aee45a&_nc_ohc=v89Ood7RE1cAX8X22N7&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQre-uXXwtMXU01RIVrAOYnQGTtgmAGVGcOXnnMjGwWqQ&oe=63C794C6)
+
+**Nhận xét:**
+
+-   Không có gì khác biệt so với 2 mô hình trên
+
+### 6.3.4 Mô hình lựa chọn cuối cùng
+
+![![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320471004_552328230085529_7430941241180099095_n.png?_nc_cat=101&ccb=1-7&_nc_sid=aee45a&_nc_ohc=gAH8yE-k-E8AX_J9cAN&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdRqgQ4W-33TqdBeb4-QBMIBY1rHzWbdX9v0dqEVb7ziRw&oe=63C8F5A7)](https://scontent.xx.fbcdn.net/v/t1.15752-9/320396849_397054519278155_1813306637220936874_n.png?_nc_cat=102&ccb=1-7&_nc_sid=aee45a&_nc_ohc=HFtQC6BofLgAX9GavRj&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdSLw1KVrbwK6lk7ViKTzym6kpn5vFj5BDLOmXlo7qSyDA&oe=63C79CFD)
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320263787_1167555733873309_8657085319554432700_n.png?_nc_cat=105&ccb=1-7&_nc_sid=aee45a&_nc_ohc=Wm7zG9hrPpsAX-Y-HsB&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdS55MOwOEzLkMRpTmpOQ8FmgQreEFvJHXcYlWxij2jqcQ&oe=63C8D8A5)
+
+**Nhận xét:**
+
+-   Mặc dù 3 thuật toán lựa chọn đều hoạt động theo cách khác nhau nhưng kết quả lại tương đồng nhau, ta chọn được những yếu tố quan trọng và xây dựng mô hình lần cuối cùng
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320028171_823150812319635_3904414547191326891_n.png?_nc_cat=106&ccb=1-7&_nc_sid=aee45a&_nc_ohc=2nJlDop0zNAAX-MFOhQ&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdS1gDSsPqO2sImljc5tldr3mF3mJDuBIQ5iI5n2TaBwkQ&oe=63C7BBEB)
+
+**Nhận xét:**
+
+-   Tương tự như mô hình đầy đủ biến.
+
+-   Residual vs Leverage: Các điểm nằm trong hình đều ảnh hưởng (do không có Cook distance).
+
+# ![](https://scontent.xx.fbcdn.net/v/t1.15752-9/319192275_5097201193713358_2576950137461037620_n.png?_nc_cat=107&ccb=1-7&_nc_sid=aee45a&_nc_ohc=f1bsy0EkDl0AX-Z9Vuz&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdQUIYPakUa0Yj1hpxMxxIufBEH2a-5ZNkRk36zdqiL7xw&oe=63C7C5C7)
+
+**Nhận xét:**
+
+-   Predicted vs Actual: Đa phần các điểm nằm trên đường dự đoán hoặc tạo thành một đường thẳng gần quanh đường dự đoán. Điều này cho thấy rằng mô hình có thể dự đoán tương đối chính xác với một sai số không quá đáng kể.
+
+# Phần 7. Kết luận
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320354867_710655743830246_8673660001298042901_n.png?_nc_cat=111&ccb=1-7&_nc_sid=aee45a&_nc_ohc=eqa0tlC5Mx8AX_lQC7b&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdSmwsK2XAMXnpMZvcb9Q313qzpBHhzIE5QXG-sH7Jl56g&oe=63C7AD16)
+
+Với những mô hình được đánh giá bằng thông số cùng với chi tiết từng mô hình ở phần trước, hầu như không có sự chênh lệch đáng kể giữa các mô hình, vậy nên ta có thể kết luận mô hình được chọn bằng những phương pháp stepwise với thông số BIC là tối ưu nhất trong những mô hình tuyến tính đa biến với 10 biến, bao gồm:
+
+-   Tỷ lệ tử vong ở người lớn
+
+-   Tỷ lệ chi tiêu cho y tế trên GDP (%)
+
+-   Trung bình chỉ số BMI theo quốc gia
+
+-   Tỷ lệ tiêm chủng bại liệt (Pol3) ở trẻ 1 tuổi (%)
+
+-   Chi tiêu cho y tế tính theo tổng chi tiêu của chính phủ (%)
+
+-   Tỷ lệ tiêm chủng giải độc tố uốn ván và ho gà (DTP3) cho trẻ 1 tuổi (%)
+
+-   Tỷ lệ tử vong trên 1000 trẻ mắc HIV / AIDS bẩm sinh (0-4 tuổi)
+
+-   Tỷ lệ gầy ốm ở trẻ em và thanh thiếu niên từ 10 đến 19 tuổi (%)
+
+-   Chỉ số phát triển con người về cơ cấu thu nhập của các nguồn lực (chỉ số từ 0 đến 1)
+
+-   Trình độ học vấn của quốc gia (trung bình số năm được đi học)
+
+Ngoài những yếu tố tử vong khó có thể thay đổi, ta có thể thấy còn lại là những biến thuộc về tiêm chủng và quốc gia. Vậy thì để cải thiện tuổi thọ, thế giới, quốc gia nói chung hay cá nhân nói riêng nên quan tâm đến việc tham gia tiêm chủng, tỷ lệ bảo phủ tiêm chủng cũng như thực hiện nhiều đầu tư cho y tế, giáo dục hơn.
+
+Vì thời gian có hạn, nhóm còn chưa trả lời được một số câu hỏi trong đề xuất chẳng hạn như mức độ tác động của từng yếu tố cũng chưa được làm rõ, cũng như thực hiện được những mô hình phức tạp hơn để dự đoán tuổi thọ con người cho tương lai. Trong tương lai, ngoài hoàn thành những gì còn xót lại, nhóm muốn hướng đến phân tích cho những nhóm quốc gia có nhiều chỉ số khá tương đồng nhau để cá nhân hoá tốt cho từng quốc gia. Tiếp theo là thu thập thêm dữ liệu để tăng mức độ chính xác cho mô hình trong khi tập dữ liệu chỉ quan sát đến năm 2015, nhóm cũng đã cố gắng tìm kiếm nhưng một vài yếu tố thì không được cập nhật liên tục nên hi vọng trong tương lai tập dữ liệu sẽ được cập nhật mới hơn.
+
+# Phần 8. Phụ lục
+
+# Phần 9. Đóng góp
+
++-----+----------+--------------------+----------------------------+------------+
+| STT | MSSV     | Họ và Tên          | Công Việc                  | Hoàn thành |
++=====+==========+====================+============================+============+
+| 28  | 20133076 | Văn Mai Thanh Nhật | -   model forward+backward | 100%       |
+|     |          |                    |                            |            |
+|     |          |                    | -   báo cáo                |            |
++-----+----------+--------------------+----------------------------+------------+
+| 33  | 20133082 | Huỳnh Minh Phước   | -   best subset            | 100%       |
+|     |          |                    |                            |            |
+|     |          |                    | -   slide                  |            |
++-----+----------+--------------------+----------------------------+------------+
+| 3   | 20133035 | Trần Đông          | -   tiền xử lí             | 100%       |
+|     |          |                    |                            |            |
+|     |          |                    | -   full                   |            |
+|     |          |                    |                            |            |
+|     |          |                    | -   step                   |            |
++-----+----------+--------------------+----------------------------+------------+
+| 5   | 20133013 | Trần Nguyên Hạnh   | -   eda                    | 100%       |
+|     |          |                    |                            |            |
+|     |          |                    | -   trực quan hóa          |            |
++-----+----------+--------------------+----------------------------+------------+
+
+# Phần 10. Tham khảo
+
+1.  Quách Đình Hoàng, Lecture, 2021. Slide and video.
+
+2.  Mohamed El-Saadany, Statistical Modeling of Life Expectancy data (R), Kaggle , 2022, đường dẫn: <https://www.kaggle.com/code/mohamedelsaadany/statistical-modeling-of-life-expectancy-data-r>
+
+3.  Prem_DJ, EDA_Life_Expetancy, Kaggle , 2022, đường dẫn: <https://www.kaggle.com/code/premdj/eda-life-expetancy>
+
+4.  George Choueiry, Understand Best Subset Selection, QUANTIFYING HEALTH, 2022, đường dẫn: <https://quantifyinghealth.com/best-subset-selection/>
+
+5.  George Choueiry, Understand Forward and Backward Stepwise Regression, QUANTIFYING HEALTH, 2022, đường dẫn: <https://quantifyinghealth.com/stepwise-selection/>

@@ -1,0 +1,423 @@
+---
+title: "Code (Life Expectancy)"
+author: "Group 6"
+date: "2022-12-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Load Package
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggcorrplot)
+library(corrplot)
+library(leaps)
+library(car)
+library(Metrics)
+library(reshape2)
+library(ggpubr)
+library(moments)
+library(naniar)
+library(VIM)
+library(plotly)
+```
+
+## Part 1. Load data
+
+```{r}
+data_input<-read_csv("./data/Life Expectancy Data.csv")
+str(data_input)
+```
+
+```{r}
+head(data_input)
+```
+
+## Part 2. Clean and filter data
+
+### 2.1 Missing data
+
+```{r}
+missing.rows = dim(data_input)[1] -  dim(na.omit(data_input))[1]
+
+missings_df <- data.frame(type=c("missing", "non-missing") ,count = c(missing.rows,  dim(na.omit(data_input))[1]))
+
+ggplot(missings_df, aes(fill=type, y="", x=count)) +
+    geom_bar(position="stack", stat="identity")+
+    ggtitle("Missing vs Non-missing row counts") +
+    xlab("Missing count") + ylab("") 
+```
+
+```{r}
+vis_miss(data_input)
+```
+
+```{r}
+data_fill <- kNN(data_input)
+data_fill <- subset(data_fill, select = country:schooling)
+vis_miss(data_fill)
+```
+
+### 2.2 **Remove unnecessary variables and** **factorize categorical variables**:
+
+```{r}
+data<-data_fill[-c(1,2,3)]
+glimpse(data)
+```
+
+### **2.3 Data transformation**
+
+```{r}
+ggplot(data, aes(x=life_expectancy)) + 
+    geom_density(alpha=.3, fill="red", color="red", size=1.5)+
+    geom_vline(aes(xintercept=mean(life_expectancy)), size=1)+
+    ggtitle("Distribution density of Life.expectancy") +
+    theme(text = element_text(size = 18))
+```
+
+```{r}
+sprintf("Skewness: [%s]", toString(skewness(data$life_expectancy, na.rm = TRUE)))
+```
+
+```{r}
+data$life_expectancy <- sqrt(max(data$life_expectancy+1)- data$life_expectancy)
+
+ggplot(data, aes(x=life_expectancy)) +
+    geom_density(alpha=.3, fill="red", color="red", size=1.5)+
+    geom_vline(aes(xintercept=mean(life_expectancy)))+
+    ggtitle("Distribution density of Life.expectancy") +
+    theme(text = element_text(size = 18))
+```
+
+## Part 3. **Exploratory Data Analysis (EDA)**
+
+### **3.1 Correlation and collinearity**
+
+```{r}
+corr <- round(cor(data), 3)
+ggcorrplot(corr,type = "upper", lab = TRUE, , outline.color = "black", lab_size = 1, legend.title = "Correlation")+
+ggtitle("Correlation Matrix")
+```
+
+```{r}
+model_linear <- lm(life_expectancy~ ., data = data)
+vifs <- data.frame(vif(model_linear))
+
+ggplot(vifs, aes(y=vif.model_linear., x=row.names(vifs))) +
+    geom_bar(aes(fill=vif.model_linear.>5),stat="identity")+
+    scale_y_continuous(trans = "sqrt",  breaks = c(5, 10, 50, 100))+
+    geom_hline(yintercept = 5, colour = "red") +
+    ggtitle("VIF per feature") +
+    xlab("Featurs") + ylab("VIF") +
+    theme(axis.text.x=element_text(angle=40, hjust=1))
+```
+
+```{r}
+data_EDA <- subset(data, select = -c(infant_mortality, `thinness_5-9`
+, GDP))
+
+model_EDA <- lm(life_expectancy~ ., data = data_EDA)
+vifs_EDA <- data.frame(vif(model_EDA))
+
+
+ggplot(vifs_EDA, aes(y=vif.model_EDA., x=row.names(vifs_EDA))) +
+    geom_bar(aes(fill=vif.model_EDA.>5),stat="identity")+
+    scale_y_continuous(trans = "sqrt",  breaks = c(5, 10, 50, 100))+
+    geom_hline(yintercept = 5, colour = "red") +
+    ggtitle("VIF per feature") +
+    xlab("Featurs") + ylab("VIF") +
+    theme(axis.text.x=element_text(angle=40, hjust=1))
+```
+
+## Part 4. Data visualization
+
+```{r}
+data_visu <- read_csv("./data/data_Visu.csv")
+data_visu <- na.omit(data_visu)
+```
+
+```{r}
+g <- list(
+showframe = TRUE,
+showcoastlines = TRUE,
+projection = list(type = 'Mercator')
+)
+
+plot <- plot_geo(data_fill, locationmode="country names")%>%
+    add_trace(locations=~country,
+             z=~life_expectancy,
+             frame=~year) %>%
+    layout(
+  title = with(data, paste('Mean Life Expectancy')),
+  geo = g
+)
+plot
+```
+
+```{r}
+fig1<-plot_ly(data_visu,x=~schooling,y=~life_expectancy,size=~population,frame = ~year,text=~country,color = ~Continent,log_x=TRUE,size_max=60)
+fig1
+```
+
+```{r}
+fig2<-plot_ly(data_visu,x=~percent_expenditure,y=~life_expectancy,size=~population,frame = ~year,text=~country,color = ~Continent,log_x=TRUE,size_max=60)
+fig2
+```
+
+```{r}
+ggplot(data_visu,aes(x=GDP,y=life_expectancy))+geom_point(color="red")+geom_smooth(method="lm")+facet_wrap(~Continent)
+```
+
+```{r}
+ggplot(data_visu,aes(x=income_composition_of_resources,y=life_expectancy))+geom_point(color="blue")+geom_smooth(method="lm")+facet_wrap(~Continent)
+```
+
+## Part 5. Models
+
+## 1. Model (full)
+
+Sử dụng data đầy đủ để tạo model với tất cả cột
+
+```{r}
+set.seed(20133076)
+sample_full<-sample(c(TRUE,FALSE),nrow(data),replace=TRUE, prob = c(0.7,0.3))
+
+train_full<-data[sample_full,]
+x_test_full<-data[!sample_full,]
+y_test_full<-data[!sample_full,]$life_expectancy
+
+model_full<-lm(life_expectancy~.,data=train_full)
+
+summary(model_full)
+```
+
+Kiểm tra
+
+```{r}
+pred_full<-predict(model_full, newdata = x_test_full)
+value_model <- data.frame("Full", rmse(pred_full,y_test_full), summary(model_full)$adj.r.squared,length(coef(model_full))-1)
+
+colnames(value_model) = c("Model", "Root Mean Squared Error", "R squared", "Number of variable")
+
+value_model
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model_full)
+```
+
+```{r}
+pred_acct_full <- data.frame(pred_full, y_test_full)
+ggplot(pred_acct_full,aes(x=pred_full, y= y_test_full)) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+```
+
+## 2. Model (AIC)
+
+```{r}
+set.seed(20133082)
+sample_step<-sample(c(TRUE,FALSE),nrow(data),replace=TRUE, prob = c(0.7,0.3))
+
+train_step<-data[sample_step,]
+x_test_step<-data[!sample_step,]
+y_test_step<-data[!sample_step,]$life_expectancy
+
+model_full_step<-lm(life_expectancy~.,data=train_step)
+```
+
+```{r, results=FALSE}
+model_step<-step(model_full_step,direction = "both",test="F")
+
+```
+
+```{r}
+summary(model_step)
+```
+
+Kiểm tra
+
+```{r}
+pred_step<-predict(model_step, newdata = x_test_step)
+value_model[nrow(value_model) + 1,] = c("AIC",rmse(y_test_step,pred_step), summary(model_step)$adj.r.squared, length(coef(model_step))-1)
+value_model
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model_step)
+```
+
+```{r}
+pred_acct_step <- data.frame(pred_step, y_test_step)
+ggplot(pred_acct_step,aes(x=pred_step, y= y_test_step)) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+```
+
+## 3. Feature selection methods
+
+Lựa chọn theo 3 phương pháp:
+
+-   Best subset
+
+-   Forward inclusion
+
+-   Backward elimination
+
+theo đó dựa trên:
+
+-   Residual sum of squares (RSS)
+
+-   Adjusted R\^2 (Adjr2)
+
+-   Mallow's Cp (CP)
+
+-   Bayesian information criterion (BIC)
+
+#### 3.1 Best subset
+
+```{r}
+set.seed(20133035)
+regfit.best <- regsubsets(life_expectancy~., data= data_EDA, nvmax = 18)
+reg.summary <- summary(regfit.best)
+
+par(mfrow=c(2,2))
+
+#- residual sum of squares:
+plot(reg.summary$rss,xlab="Number of Variables",ylab="RSS",type="l")
+which.min(reg.summary$rss)
+points(15,reg.summary$rss[15], col="red",cex=2,pch=20)
+
+# adjusted-R^2 with its largest value
+plot(reg.summary$adjr2,xlab="Number of Variables",ylab="Adjusted Rsq",type="l")
+which.max(reg.summary$adjr2)
+points(14,reg.summary$adjr2[14], col="red",cex=2,pch=20)
+
+# Mallow's Cp with its smallest value
+plot(reg.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+which.min(reg.summary$cp)
+points(14,reg.summary$cp[14],col="red",cex=2,pch=20)
+
+# BIC with its smallest value
+plot(reg.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+which.min(reg.summary$bic)
+points(10,reg.summary$bic[15],col="red",cex=2,pch=20)
+```
+
+Có thể thấy BIC cho số biến ít nhất nên từ đây chỉ xét theo BIC.
+
+#### 3.2 Forward inclusion
+
+```{r}
+
+par(mfrow=c(1,1))
+set.seed(20133013)
+regfit.fwd <- regsubsets(life_expectancy~.,data=data_EDA,nvmax=18,method="forward")
+fwd.summary <-summary(regfit.fwd)
+
+# fwd.summary
+#set_plot_dimensions(8,6)
+plot(fwd.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+which.min(fwd.summary$bic)
+points(10,fwd.summary$bic[10],col="red",cex=2,pch=20)
+```
+
+#### 3.3 Backward elimination
+
+```{r}
+set.seed(20133013)
+regfit.bwd <- regsubsets(life_expectancy~.,data=data_EDA,nvmax=18,method="backward")
+bwd.summary <- summary(regfit.bwd)
+
+# fwd.summary
+#set_plot_dimensions(8,6)
+plot(bwd.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+which.min(bwd.summary$bic)
+points(10,bwd.summary$bic[10],col="red",cex=2,pch=20)
+```
+
+Tất cả các phương pháp với BIC đều cho ra kết quả là 10 biến.
+
+```{r}
+v_names <- rownames(as.data.frame(coef(regfit.best,10)))
+coefs<- data.frame(v_names)
+coefs$best_coef_value<- coef(regfit.best,10)
+coefs$fwd_coef_value <-  coef(regfit.fwd,10)
+coefs$bwd_coef_value <-  coef(regfit.bwd,10)
+
+#set_plot_dimensions(18,4)
+ggplot(coefs,
+       aes(x=v_names, y=best_coef_value, fill=best_coef_value)) +
+                                  geom_bar(stat="identity") +
+                                  ggtitle("Features & coeffecients: [method Best]") +
+                                  xlab("Feature") + ylab("Coef value") +
+                                  theme(axis.text.x=element_text(angle=45, hjust=1))
+
+ggplot(coefs,
+       aes(x=v_names, y=fwd_coef_value, fill=fwd_coef_value)) +
+                                  geom_bar(stat="identity") +
+                                  ggtitle("Features & coeffecients: [method Forward inclusion]") +
+                                  xlab("Feature") + ylab("Coef value") +
+                                  theme(axis.text.x=element_text(angle=45, hjust=1))
+ggplot(coefs,
+       aes(x=v_names, y=bwd_coef_value, fill=bwd_coef_value)) +
+                                  geom_bar(stat="identity") +
+                                  ggtitle("Feature & coeffecients: [method Backward elimination]") +
+                                  xlab("Feature") + ylab("Coef value") +
+                                  theme(axis.text.x=element_text(angle=45, hjust=1))
+```
+
+3 phương pháp đã chọn ra 10 biến. Tạo data:
+
+```{r}
+
+data_select<-subset(data, select = c(life_expectancy, adult_mortality, percent_expenditure, BMI, polio, total_expenditure, diphtheria, `HIV/AIDS_mortality`, `thinness_1-19`,income_composition_of_resources,  schooling ))
+
+```
+
+#### 3.4 Final model
+
+```{r}
+set.seed(20133077)
+sample_select<-sample(c(TRUE, FALSE), nrow(data_select), replace=TRUE, prob=c(0.70,0.30))
+
+train_select<-data_select[sample_select,]
+x_select_test<-data_select[!sample_select,]
+y_select_test<-data_select[!sample_select,]$life_expectancy
+
+
+model_select<-lm(life_expectancy~.,data=train_select)
+summary(model_select)
+
+```
+
+Kiểm tra
+
+```{r}
+pred_select<-predict(model_select, newdata = x_select_test)
+
+value_model[nrow(value_model) + 1,] = c("BIC",rmse(y_select_test,pred_select), summary(model_select)$adj.r.squared, length(coef(model_select))-1)
+value_model
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(model_select)
+```
+
+```{r}
+pred_acct_select <- data.frame(pred_select, y_select_test)
+ggplot(pred_acct_select,aes(x=pred_select, y= y_select_test)) +
+  geom_point() +
+  geom_abline(intercept=0, slope=1) +
+  labs(x='Predicted Values', y='Actual Values', title='Predicted vs. Actual Values')
+```

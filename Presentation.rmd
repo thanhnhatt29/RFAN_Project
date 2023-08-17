@@ -1,0 +1,108 @@
+---
+title: "What factor effect life expentancy?"
+author: "Group 6"
+date: "2022-12-20"
+output:
+  ioslides_presentation: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+```
+
+## 
+
+| STT | MSSV     | Full Name          | Image                                                                                                                                                                                                                                                                                    |
+|--------------|--------------|--------------|------------------------------|
+| 28  | 20133076 | Văn Mai Thanh Nhật | ![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320488853_902496410915127_6827902085794682927_n.png?_nc_cat=107&ccb=1-7&_nc_sid=aee45a&_nc_ohc=Xa-cFt0I2ccAX-BwLBS&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdTnXeOtcGfHevv1nKCfQ--U87yoOIwbr1FTXI4ValCi-g&oe=63C9067C){width="98"}  |
+| 33  | 20133082 | Huỳnh Minh Phước   | ![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320316246_1157912071786694_3768473794810122097_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=aee45a&_nc_ohc=WBKZLQbRFpgAX8MxCUJ&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdT1saPPSDYM5I2095_QE1t1aVz9E9Uv53aNDKmV-FYzlw&oe=63C90298){width="98"} |
+| 3   | 20133035 | Trần Đông          | ![](https://scontent.xx.fbcdn.net/v/t1.15752-9/319330000_544285637615553_7239915965551920629_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=aee45a&_nc_ohc=8hEKYPa2tW8AX_7Dmu1&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdSrI0RBfqA6vpN4fU8jbEp_yUjoeqbeNQx1TC7RFawBjQ&oe=63C8E110){width="98"}  |
+| 5   | 20133013 | Trần Nguyên Hạnh   | ![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320393577_880800143267268_4664866759054046477_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=aee45a&_nc_ohc=uJC1g1hKYAMAX8AEsHs&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdR-wURkR2fGw9xRLqw6H4sZTO8udYQMeF1ZhDugBoFWLQ&oe=63C8E247){width="98"}  |
+
+## Part 1 - Factors Affecting Life Expectancy
+
+-   Previous studies:
+
+    -   just considering demographic variables, income composition and mortality rates
+
+    -   based on data set of one year for all the countries
+
+-   Motivation:
+
+    -   considering data from a period of 2000 to 2015 for all the countries
+
+    -   focus on immunization factors, mortality factors, economic factors, social factors and other health related factors
+
+```{r, include = FALSE}
+LifeExpec<- read_csv("./Life Expectancy Data.csv")
+```
+
+## Part 2 - Data
+
+-   **Dataset Name:** Life Expectancy (WHO)
+-   **From:** Kaggle
+-   **Source:** *World Health Organization (WHO) & United Nations (UN)*
+-   **Include** : 22 columns & 2938 rows
+
+## Part 3 - EDA
+
+### 3.1 Histogram
+
+![](https://www.kaggleusercontent.com/kf/77593431/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..j3LOuHFVbobjTt1aJpKosA.HA7o8dRo3L1EPC9I-XT_zSM0uowSPV6HHg-Pf1W9-etaSPd4gHV6GEoDVWQYwKv_9k-5SX2qewUCeLvF_CnHZyBi6fMt7cxm8Dj9CS4Bv4ALjeJmgSnYB46V16LOjl1E65hDxIhzCHPkPmagGmUGClRpfaRVaEjutMNS3Y2i8YxNP0MnOJI9vH_9d0qF3z5RKVdVHzvP_lmPnixm3d3AnwF_G7hEoN_T2P3U9mV4tpXGqvbIkhLmCAHP_WzJIlOH55wVrO8JckXCvrusvmQ9BxfXK6sLkWw7DheGRKUZ33MKoqu4-B5B8E7WbuxIxHr17P_fhEMLCkyuVxxOceEKXGLcAcCAfCd0U5rAi5YQdREJIscvDdWlna5_CNwKeUoJ5SEzMcQ4O7L17F4Fux2B4dPm39uz2YU3-53ymJUfBoEFdxqKsEfBWMfxkapNh02FhyLiKQf3Bl6umRk6Xwal-auGmjUkpVntGxgSGcjCa8XN1-CKhrtai0e1uOoYnMwQ_cN6TZlC3NvNXMxqRYZhu6ucLaS3oF1olQ8C9nRc2Mxrt7CUuAVUNWyQkK-2OPaFc6xFFRn2bjkk_Hrd2Xxc0GwrWc_UL42sDKSq4ctbZcLYVQo3CnHUn_VI2Kx_Nfz_S5PNmFqXuvzUOc9WQwPbZw.JvklugHKuWup7-pgKhIm_Q/__results___files/__results___24_0.png){width="500"}
+
+## 3.2 Life Expen \~ .
+
+### ![](https://www.kaggleusercontent.com/kf/77593431/eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..j3LOuHFVbobjTt1aJpKosA.HA7o8dRo3L1EPC9I-XT_zSM0uowSPV6HHg-Pf1W9-etaSPd4gHV6GEoDVWQYwKv_9k-5SX2qewUCeLvF_CnHZyBi6fMt7cxm8Dj9CS4Bv4ALjeJmgSnYB46V16LOjl1E65hDxIhzCHPkPmagGmUGClRpfaRVaEjutMNS3Y2i8YxNP0MnOJI9vH_9d0qF3z5RKVdVHzvP_lmPnixm3d3AnwF_G7hEoN_T2P3U9mV4tpXGqvbIkhLmCAHP_WzJIlOH55wVrO8JckXCvrusvmQ9BxfXK6sLkWw7DheGRKUZ33MKoqu4-B5B8E7WbuxIxHr17P_fhEMLCkyuVxxOceEKXGLcAcCAfCd0U5rAi5YQdREJIscvDdWlna5_CNwKeUoJ5SEzMcQ4O7L17F4Fux2B4dPm39uz2YU3-53ymJUfBoEFdxqKsEfBWMfxkapNh02FhyLiKQf3Bl6umRk6Xwal-auGmjUkpVntGxgSGcjCa8XN1-CKhrtai0e1uOoYnMwQ_cN6TZlC3NvNXMxqRYZhu6ucLaS3oF1olQ8C9nRc2Mxrt7CUuAVUNWyQkK-2OPaFc6xFFRn2bjkk_Hrd2Xxc0GwrWc_UL42sDKSq4ctbZcLYVQo3CnHUn_VI2Kx_Nfz_S5PNmFqXuvzUOc9WQwPbZw.JvklugHKuWup7-pgKhIm_Q/__results___files/__results___25_0.png){width="527"}
+
+## 3.3 **Correlation and collinearity**
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320393577_1826383437742327_2136395517540787966_n.png?_nc_cat=101&ccb=1-7&_nc_sid=aee45a&_nc_ohc=iiZuWAiSW4IAX9ccuaC&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdT0Rh4Nd9dHcVaX92UnH3OEt6oa5TJpudzrW2wIwIqiOQ&oe=63C8BD1A){width="647"}
+
+## 3.4 VIF
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320039761_1101332277228483_7487596770796566450_n.png?_nc_cat=104&ccb=1-7&_nc_sid=aee45a&_nc_ohc=9tFG0kgCzE4AX-DiIKC&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdTuUNih8G_e1FaQkUNdTaCZMkpBQUeojTf5ieNM0nMBZA&oe=63C8D60B){width="779"}
+
+## Part 4 - Model
+
+### Workflow
+
+![](https://scontent.fsgn2-2.fna.fbcdn.net/v/t1.15752-9/318776070_1313193859520296_5852520200730962005_n.png?_nc_cat=103&ccb=1-7&_nc_sid=ae9488&_nc_ohc=RZHQwsc8ZKQAX-0vvrh&tn=ed4gF1qjRLIP0pbN&_nc_ht=scontent.fsgn2-2.fna&oh=03_AdTg1WM4kHxaBwtLc-_dbWSgzuud8_SYyum78okU5ptLbA&oe=63C9090E){width="581"}
+
+## 4.1 Full:
+
+![](https://scontent.fsgn2-5.fna.fbcdn.net/v/t1.15752-9/320430424_849720806332128_5582940683977690268_n.png?_nc_cat=106&ccb=1-7&_nc_sid=ae9488&_nc_ohc=WUg8TVkz_RcAX98IDH8&tn=ed4gF1qjRLIP0pbN&_nc_ht=scontent.fsgn2-5.fna&oh=03_AdRrn4waUK4BE8hcZ3dNi7GJbz204kceepkxs9wLkNmbGA&oe=63C8EBC3){width="721"}
+
+## 4.2 AIC
+
+![](https://scontent.fsgn2-8.fna.fbcdn.net/v/t1.15752-9/320147690_1562832494144068_6454946314924379176_n.png?_nc_cat=102&ccb=1-7&_nc_sid=ae9488&_nc_ohc=jox1mG8Om1YAX9oQiYw&_nc_ht=scontent.fsgn2-8.fna&oh=03_AdRZCEqAORnyfiz98X3sjPaNgpHGkeueFEydJIInXpyjKQ&oe=63C8FCC2){width="732"}
+
+## 4.3 Stepwise & BIC
+
+![](https://scontent.fsgn2-1.fna.fbcdn.net/v/t1.15752-9/319192275_5097201193713358_2576950137461037620_n.png?_nc_cat=107&ccb=1-7&_nc_sid=ae9488&_nc_ohc=f1bsy0EkDl0AX8Zk3ic&_nc_ht=scontent.fsgn2-1.fna&oh=03_AdTEvTy_QUKGtLXNfPesGLOFwa9K4HMGS9eSI6gbJ9mXNg&oe=63C8DF07){width="734"}
+
+## Part 5 - Conclusion
+
+![](https://scontent.xx.fbcdn.net/v/t1.15752-9/320354867_710655743830246_8673660001298042901_n.png?_nc_cat=111&ccb=1-7&_nc_sid=aee45a&_nc_ohc=eqa0tlC5Mx8AX_lQC7b&_nc_ad=z-m&_nc_cid=0&_nc_ht=scontent.xx&oh=03_AdSmwsK2XAMXnpMZvcb9Q313qzpBHhzIE5QXG-sH7Jl56g&oe=63C7AD16)
+
+## 
+
+<font size="4">Factor affect life expentancy:
+
+-   Mortality rate: Adult, Deaths per 1 000 live births HIV/AIDS (0-4 years)
+-   Country : Expenditure on health as a percentage of Gross Domestic Product per capita, General government expenditure on health as a percentage of total government expenditure, Human Development Index in terms of income composition of resources, Number of years of Schooling, Average Body Mass Index of entire population
+-   Vaccination rate: Polio (Pol3) immunization coverage among 1-year-olds, Diphtheria tetanus toxoid and pertussis (DTP3) immunization coverage among 1-year-olds
+-   Prevalence of thinness among children and adolescents for Age 10 to 19 (% )
+
+Future plans:
+
+-   Personalize for each type of country or each country
+-   Build complex models to predict for the future
+-   Update dataset</font>
